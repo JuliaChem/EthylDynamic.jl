@@ -1,0 +1,32 @@
+button {
+	font: 16px Sans;
+	color: white;
+	background: #B2C3E4;
+	border-width: 0px;
+	border-radius: 4px;
+}
+
+button:hover {
+	font: 16px Sans;
+	color: white;
+	background-color: #B2DDE4;
+	border-width: 0px;
+	border-radius: 4px;
+}
+
+button:hover#close, button:hover#closeAbout {
+	font: 16px Sans;
+	color: white;
+	background-color: #F67FA5;
+	border-width: 0px;
+	border-radius: 4px;
+}
+
+window {
+	background-color: white;
+}
+
+label {
+	font: 12px Serif;
+	color: gray;
+}
