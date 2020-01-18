@@ -1,10 +1,8 @@
 using Gtk.ShortNames, Winston, Random, JLD, Suppressor
 
 global style_file = joinpath(dirname(Base.source_path()), "style2020.css")
-global img = Gtk.Image(joinpath(
-    dirname(Base.source_path()),
-    "media\\mainlogo.png",
-))
+global img = Gtk.Image(joinpath(dirname(Base.source_path()),
+    "media\\mainlogo.png"))
 # Environmental variable to allow Windows decorations
 ENV["GTK_CSD"] = 0
 
@@ -99,7 +97,7 @@ function EthylDynamic()
             set_gtk_property!(toolbar, :height_request, 20)
 
             newWin = Window()
-    # Properties for mainWin
+# Properties for mainWin
             set_gtk_property!(newWin, :title, "MetDynamic 1.0")
             set_gtk_property!(newWin, :window_position, 3)
             set_gtk_property!(newWin, :height_request, 800)
@@ -118,7 +116,6 @@ function EthylDynamic()
             vbox3 = Gtk.Grid()
             vbox4 = Gtk.Grid()
             can = Canvas(300, 400)
-
 
             push!(nb, vbox1, "Compounds")
             push!(nb, vbox2, "Equipments")
@@ -178,41 +175,29 @@ function EthylDynamic()
             end
 
             label1 = Label("Hola")
-            Gtk.GAccessor.markup(
-                label1,
+            Gtk.GAccessor.markup(label1,
                 """<b>Dr. Kelvyn B. Sánchez Sánchez</b>
-        <i>Instituto Tecnológico de Celaya</i>\nkelvyn.baruc@gmail.com""",
-            )
-
-            Gtk.GAccessor.justify(
-                label1,
-                Gtk.GConstants.GtkJustification.CENTER,
-            )
+<i>Instituto Tecnológico de Celaya</i>\nkelvyn.baruc@gmail.com""")
+            Gtk.GAccessor.justify(label1,
+                Gtk.GConstants.GtkJustification.CENTER)
             Gtk.GAccessor.selectable(label1, true)
 
             label2 = Label("Hola")
             Gtk.GAccessor.markup(
                 label2,
                 """<b>Dr. Arturo Jimenez Gutierrez</b>
-        <i>Instituto Tecnológico de Celaya</i>\narturo@iqcelaya.itc.mx""",
-            )
-            Gtk.GAccessor.justify(
-                label2,
-                Gtk.GConstants.GtkJustification.CENTER,
-            )
+<i>Instituto Tecnológico de Celaya</i>\narturo@iqcelaya.itc.mx""")
+            Gtk.GAccessor.justify(label2,
+            Gtk.GConstants.GtkJustification.CENTER)
             Gtk.GAccessor.selectable(label2, true)
 
             label3 = Label("Hola")
-            Gtk.GAccessor.markup(
-                label3,
+            Gtk.GAccessor.markup(label3,
                 """Free available at GitHub:
         <a href=\"https://github.com/JuliaChem/SimBioReactor.jl\"
-        title=\"Clic to download\">https://github.com/JuliaChem/SimBioReactor.jl</a>""",
-            )
-            Gtk.GAccessor.justify(
-                label3,
-                Gtk.GConstants.GtkJustification.CENTER,
-            )
+        title=\"Clic to download\">https://github.com/JuliaChem/SimBioReactor.jl</a>""")
+            Gtk.GAccessor.justify(label3,
+                Gtk.GConstants.GtkJustification.CENTER)
 
             aboutGrid[1:3, 1] = label1
             aboutGrid[4:6, 1] = label2

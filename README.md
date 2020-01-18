@@ -1,2 +1,2 @@
-# Ethyldynamic.jl
-Dynamic simulator for ethylene production from shale gas. 
+# EthylDynamic.jl
+Dynamic simulator for ethylene production from shale gas.
