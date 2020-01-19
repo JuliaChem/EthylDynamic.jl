@@ -9,27 +9,26 @@ ENV["GTK_CSD"] = 0
 # Initialization of main fuction
 function EthylDynamic()
     # Suppress warnings
-    @suppress begin
+    #@suppress begin
 
-# CSS style
+        # CSS style
         global provider = CssProviderLeaf(filename = style_file)
 
-# TODO Agregar Titulo y foto de molecula
-
-############################################################################
-# Grids
-############################################################################
+        ############################################################################
+        # Grids
+        ############################################################################
         mainWin = Window()
-# Properties for mainWin
+        # Properties for mainWin
         set_gtk_property!(mainWin, :title, "EthylDynamic")
         set_gtk_property!(mainWin, :window_position, 3)
         set_gtk_property!(mainWin, :accept_focus, true)
         screen = Gtk.GAccessor.style_context(mainWin)
         push!(screen, StyleProvider(provider), 600)
-############################################################################
-# Grids
-############################################################################
-# Properties for mainGrid
+
+        ############################################################################
+        # Grids
+        ############################################################################
+        # Properties for mainGrid
         mainGrid = Grid()
         set_gtk_property!(mainGrid, :column_spacing, 20)
         set_gtk_property!(mainGrid, :row_spacing, 20)
@@ -40,10 +39,10 @@ function EthylDynamic()
         set_gtk_property!(mainGrid, :column_homogeneous, true)
         set_gtk_property!(mainGrid, :row_homogeneous, false)
 
-############################################################################
-# Main buttons
-############################################################################
-# New simulation actions
+        ############################################################################
+        # Main buttons
+        ############################################################################
+        # New simulation actions
         new = Button("New simulation")
         set_gtk_property!(new, :name, "new")
         set_gtk_property!(new, :width_request, 150)
@@ -82,72 +81,101 @@ function EthylDynamic()
         screen = Gtk.GAccessor.style_context(close)
         push!(screen, StyleProvider(provider), 600)
 
-############################################################################
-# Signal Connect
-############################################################################
-# New simulation button
+        ############################################################################
+        # Signal Connect
+        ############################################################################
+        # New simulation button
         signal_connect(new, :clicked) do widget
-            tb1 = ToolButton("gtk-open")
-            tb2 = ToolButton("gtk-new")
-            tb3 = ToolButton("gtk-delete")
-            toolbar = Toolbar()
-            push!(toolbar, tb1)
-            pushfirst!(toolbar, tb2)
-            push!(toolbar, tb3)
-            set_gtk_property!(toolbar, :height_request, 20)
 
             newWin = Window()
-# Properties for mainWin
-            set_gtk_property!(newWin, :title, "MetDynamic 1.0")
+            # Properties for mainWin
+            set_gtk_property!(newWin, :title, "EthylDynamic 1.0")
             set_gtk_property!(newWin, :window_position, 3)
             set_gtk_property!(newWin, :height_request, 800)
-            set_gtk_property!(newWin, :width_request, 800)
+            set_gtk_property!(newWin, :width_request, 1200)
             set_gtk_property!(newWin, :accept_focus, true)
+            screen = Gtk.GAccessor.style_context(newWin)
+            push!(screen, StyleProvider(provider), 600)
 
-            g = Grid()
-            set_gtk_property!(g, :column_homogeneous, true)
-            set_gtk_property!(g, :row_homogeneous, false)
+            # Menu Icons
+            tb1 = ToolButton("gtk-new")
+            tb2 = ToolButton("gtk-open")
+            tb3 = ToolButton("gtk-save")
 
-            g[1, 1] = toolbar
+            # Close toolbar
+            tb4 = ToolButton("gtk-close")
+            signal_connect(tb4, :clicked) do widget
+                destroy(newWin)
+            end
+            signal_connect(newWin, "key-press-event") do widget, event
+                if event.keyval == 65307
+                    destroy(newWin)
+                end
+            end
+
+            newToolbar = Toolbar()
+            set_gtk_property!(newToolbar, :height_request, 20)
+            push!(newToolbar, SeparatorToolItem())
+            push!(newToolbar, tb1)
+            push!(newToolbar, tb2)
+            push!(newToolbar, tb3)
+            push!(newToolbar, SeparatorToolItem())
+            push!(newToolbar, tb4)
+            push!(newToolbar, SeparatorToolItem())
+
+            newG = Grid()
+            set_gtk_property!(newG, :column_homogeneous, true)
+            set_gtk_property!(newG, :row_homogeneous, false)
+
+            newFrame1 = Frame()
+            push!(newFrame1, newToolbar)
+            newG[1, 1] = newFrame1
 
             nb = Notebook()
-            vbox1 = Gtk.Grid()
-            vbox2 = Gtk.Grid()
-            vbox3 = Gtk.Grid()
-            vbox4 = Gtk.Grid()
-            can = Canvas(300, 400)
+            set_gtk_property!(nb, :height_request, 760)
+            screen = Gtk.GAccessor.style_context(nb)
+            push!(screen, StyleProvider(provider), 600)
 
+            # Tab 1
+            vbox1 = Grid()
             push!(nb, vbox1, "Compounds")
+
+            # Tab 2
+            vbox2 = Grid()
             push!(nb, vbox2, "Equipments")
+
+            # Tab 3
+            vbox3 = Grid()
             push!(nb, vbox3, "Thermodynamics")
+
+            # Tab 4
+            vbox4 = Grid()
             push!(nb, vbox4, "Results")
 
             b1 = Button("Hola")
-
             vbox4[1, 1] = b1
-            vbox4[1, 2] = can
-            p = plot(randn(50))
-            display(can, p)
-            g[1, 2] = nb
-            push!(newWin, g)
+
+            newFrame2 = Frame()
+            newG[1, 2] = nb
+            push!(newWin, newG)
 
             Gtk.showall(newWin)
         end
 
-# Close
+        # Close
         signal_connect(mainWin, "key-press-event") do widget, event
             if event.keyval == 65307
                 destroy(mainWin)
             end
         end
 
-# Close
+        # Close
         signal_connect(close, :clicked) do widget
             destroy(mainWin)
         end
 
-# TODO Checar texto y link
-# About
+        # TODO Checar texto y link
+        # About
         signal_connect(about, :clicked) do widget
             aboutWin = Window()
             set_gtk_property!(aboutWin, :title, "About")
@@ -232,7 +260,7 @@ function EthylDynamic()
         push!(f1, mainGrid)
         push!(mainWin, f1)
         Gtk.showall(mainWin)
-    end
+    #end
 end
 
 #dataFile = joinpath(dirname(Base.source_path()), "dataBank.jld")
