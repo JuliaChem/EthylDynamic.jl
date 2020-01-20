@@ -14,7 +14,7 @@ button:hover {
 	border-radius: 4px;
 }
 
-button:hover#close, button:hover#closeAbout {
+button:hover#close, button:hover#closeAbout, button:hover#newGClose, button:hover#newGExit {
 	font: 16px Sans;
 	color: white;
 	background-color: #F67FA5;
@@ -29,4 +29,8 @@ window {
 label {
 	font: 12px Serif;
 	color: gray;
+}
+
+grid {
+	background-color: #E2E2E2;
 }
