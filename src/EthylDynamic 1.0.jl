@@ -1,4 +1,4 @@
-using Gtk.ShortNames, Winston, Random, JLD, Suppressor
+using Gtk.ShortNames, JLD, Suppressor
 
 # Path to CSS Gtk-Style dataFile
 global style_file = joinpath(dirname(Base.source_path()), "style2020.css")
@@ -134,14 +134,18 @@ function EthylDynamic()
             gridToolbar[1, 1] = frameToolbar
 
             # Notebook
-            nb = Notebook()
-            set_gtk_property!(nb, :height_request, 700)
+            global nb = Notebook()
+            set_gtk_property!(nb, :tab_pos, 0)
             screen = Gtk.GAccessor.style_context(nb)
             push!(screen, StyleProvider(provider), 600)
 
             ############################################################################
             # Tab 1 - Compounds
             ############################################################################
+            nbFrame1 = Frame()
+            screen = Gtk.GAccessor.style_context(nbFrame1)
+            push!(screen, StyleProvider(provider), 600)
+
             vbox1 = Grid()
             set_gtk_property!(vbox1, :column_homogeneous, false)
             set_gtk_property!(vbox1, :row_homogeneous, false)
@@ -151,31 +155,32 @@ function EthylDynamic()
             set_gtk_property!(vbox1, :margin_bottom, 20)
             set_gtk_property!(vbox1, :margin_left, 20)
             set_gtk_property!(vbox1, :margin_right, 20)
+            set_gtk_property!(vbox1, :halign, 3)
 
             # Frame for databank
             vbox1Frame1 = Frame("Databank")
-            set_gtk_property!(vbox1Frame1, :width_request, 1160)
-            set_gtk_property!(vbox1Frame1, :height_request, 310)
+            set_gtk_property!(vbox1Frame1, :width_request, 880)
+            set_gtk_property!(vbox1Frame1, :height_request, 330)
             set_gtk_property!(vbox1Frame1, :label_xalign, 0.50)
 
             # Frame for compouns
             vbox1Frame2 = Frame("Added Compounds")
-            set_gtk_property!(vbox1Frame2, :width_request, 1160)
-            set_gtk_property!(vbox1Frame2, :height_request, 310)
+            set_gtk_property!(vbox1Frame2, :width_request, 800)
+            set_gtk_property!(vbox1Frame2, :height_request, 330)
             set_gtk_property!(vbox1Frame2, :label_xalign, 0.50)
 
             ############################################################################
-            # Datasheet vbox1
-            gridDatabank = GtkGrid()
+            # Datasheet vbox1Frame1
+            gridDatabank = Grid()
             set_gtk_property!(gridDatabank, :halign, 3)
             set_gtk_property!(gridDatabank, :valign, 3)
 
             # Frame with border to enhance the style
-            frameDatabank = GtkFrame()
+            frameDatabank = Frame()
             set_gtk_property!(frameDatabank, :border_width, 1)
 
             # GtkListStore where the data is actually saved
-            listDatabank = GtkListStore(Float64, String, Float64, Float64)
+            listDatabank = ListStore(Float64, String, Float64, Float64)
 
             # Data for example
             push!(listDatabank,(1,"Water",1,1))
@@ -184,22 +189,22 @@ function EthylDynamic()
             push!(listDatabank,(4,"Vocka",12,1))
 
             # Gtk TreeView to show the graphical element
-            viewDatabank = GtkTreeView(GtkTreeModel(listDatabank))
+            viewDatabank = TreeView(TreeModel(listDatabank))
             set_gtk_property!(viewDatabank, :enable_grid_lines, 3)
 
             # Window that allow scroll the TreeView
-            scrollDatabank = GtkScrolledWindow(viewDatabank)
+            scrollDatabank = ScrolledWindow(viewDatabank)
             set_gtk_property!(scrollDatabank, :width_request, 600)
             set_gtk_property!(scrollDatabank, :height_request, 250)
             selection1 = Gtk.GAccessor.selection(viewDatabank)
             selection1 = Gtk.GAccessor.mode(selection1,Gtk.GConstants.GtkSelectionMode.MULTIPLE)
 
             # Column definitions
-            cel1 = GtkCellRendererText()
-            c11 = GtkTreeViewColumn("ID", cel1, Dict([("text",0)]))
-            c12 = GtkTreeViewColumn("Name", cel1, Dict([("text",1)]))
-            c13 = GtkTreeViewColumn("MW", cel1, Dict([("text",2)]))
-            c14 = GtkTreeViewColumn("Tc", cel1, Dict([("text",3)]))
+            cel1 = CellRendererText()
+            c11 = TreeViewColumn("ID", cel1, Dict([("text",0)]))
+            c12 = TreeViewColumn("Name", cel1, Dict([("text",1)]))
+            c13 = TreeViewColumn("MW", cel1, Dict([("text",2)]))
+            c14 = TreeViewColumn("Tc", cel1, Dict([("text",3)]))
 
             # Add column to TreeView
             push!(viewDatabank, c11, c12, c13, c14)
@@ -229,17 +234,17 @@ function EthylDynamic()
             end
 
             ############################################################################
-            # Datasheet vbox2
-            gridComp = GtkGrid()
+            # Datasheet vboxFrame2
+            gridComp = Grid()
             set_gtk_property!(gridComp, :halign, 3)
             set_gtk_property!(gridComp, :valign, 3)
 
             # Frame with border to enhance the style
-            frameComp = GtkFrame()
+            frameComp = Frame()
             set_gtk_property!(frameComp, :border_width, 1)
 
             # GtkListStore where the data is actually saved
-            listComp = GtkListStore(Float64, String, Float64, Float64)
+            listComp = ListStore(Float64, String, Float64, Float64)
 
             # Data for example
             push!(listComp,(1,"Water",1,1))
@@ -248,22 +253,22 @@ function EthylDynamic()
             push!(listComp,(4,"Vocka",12,1))
 
             # Gtk TreeView to show the graphical element
-            viewComp = GtkTreeView(GtkTreeModel(listComp))
+            viewComp = TreeView(TreeModel(listComp))
             set_gtk_property!(viewComp, :enable_grid_lines, 3)
 
             # Window that allow scroll the TreeView
-            scrollComp = GtkScrolledWindow(viewComp)
+            scrollComp = ScrolledWindow(viewComp)
             set_gtk_property!(scrollComp, :width_request, 600)
             set_gtk_property!(scrollComp, :height_request, 250)
             selection2 = Gtk.GAccessor.selection(viewComp)
             selection2 = Gtk.GAccessor.mode(selection2,Gtk.GConstants.GtkSelectionMode.MULTIPLE)
 
             # Column definitions
-            cel1 = GtkCellRendererText()
-            c21 = GtkTreeViewColumn("ID", cel1, Dict([("text",0)]))
-            c22 = GtkTreeViewColumn("Name", cel1, Dict([("text",1)]))
-            c23 = GtkTreeViewColumn("MW", cel1, Dict([("text",2)]))
-            c24 = GtkTreeViewColumn("Tc", cel1, Dict([("text",3)]))
+            cel1 = CellRendererText()
+            c21 = TreeViewColumn("ID", cel1, Dict([("text",0)]))
+            c22 = TreeViewColumn("Name", cel1, Dict([("text",1)]))
+            c23 = TreeViewColumn("MW", cel1, Dict([("text",2)]))
+            c24 = TreeViewColumn("Tc", cel1, Dict([("text",3)]))
 
             # Add column to TreeView
             push!(viewComp, c21, c22, c23, c24)
@@ -296,28 +301,85 @@ function EthylDynamic()
             vbox1[1, 1] = vbox1Frame1
             vbox1[1, 2] = vbox1Frame2
 
-            push!(nb, vbox1, "Compounds")
+            push!(nbFrame1, vbox1)
+            push!(nb, nbFrame1, "Compounds")
 
             ############################################################################
             # Tab 2
             ############################################################################
+            nbFrame2 = Frame()
+            screen = Gtk.GAccessor.style_context(nbFrame2)
+            push!(screen, StyleProvider(provider), 600)
+
             vbox2 = Grid()
-            push!(nb, vbox2, "Equipments")
+
+            push!(nbFrame2, vbox2)
+            push!(nb, nbFrame2, "Equipments")
 
             ############################################################################
-            # Tab 3
+            # Tab 3 - Flowsheet
             ############################################################################
+            nbFrame3 = Frame()
+            screen = Gtk.GAccessor.style_context(nbFrame3)
+            push!(screen, StyleProvider(provider), 600)
+
             vbox3 = Grid()
-            push!(nb, vbox3, "Thermodynamics")
+            set_gtk_property!(vbox3, :column_homogeneous, false)
+            set_gtk_property!(vbox3, :row_homogeneous, false)
+            set_gtk_property!(vbox3, :column_spacing, 10)
+            set_gtk_property!(vbox3, :row_spacing, 10)
+            set_gtk_property!(vbox3, :margin_top, 10)
+            set_gtk_property!(vbox3, :margin_bottom, 20)
+            set_gtk_property!(vbox3, :margin_left, 20)
+            set_gtk_property!(vbox3, :margin_right, 20)
+            set_gtk_property!(vbox3, :halign, 3)
+
+            push!(nbFrame3, vbox3)
+            push!(nb, nbFrame3, "Flowsheet")
 
             ############################################################################
             # Tab 4
             ############################################################################
-            vbox4 = Grid()
-            push!(nb, vbox4, "Results")
+            nbFrame4 = Frame()
+            screen = Gtk.GAccessor.style_context(nbFrame4)
+            push!(screen, StyleProvider(provider), 600)
 
-            b1 = Button("Hola")
-            vbox4[1, 1] = b1
+            vbox4 = Grid()
+
+            push!(nbFrame4, vbox4)
+            push!(nb, nbFrame4, "Thermodynamics")
+
+            ############################################################################
+            # Tab 5 - Security
+            ############################################################################
+            nbFrame5 = Frame()
+            screen = Gtk.GAccessor.style_context(nbFrame5)
+            push!(screen, StyleProvider(provider), 600)
+
+            vbox5 = Grid()
+            set_gtk_property!(vbox5, :column_homogeneous, false)
+            set_gtk_property!(vbox5, :row_homogeneous, false)
+            set_gtk_property!(vbox5, :column_spacing, 10)
+            set_gtk_property!(vbox5, :row_spacing, 10)
+            set_gtk_property!(vbox4, :margin_top, 10)
+            set_gtk_property!(vbox5, :margin_bottom, 20)
+            set_gtk_property!(vbox5, :margin_left, 20)
+            set_gtk_property!(vbox5, :margin_right, 20)
+
+            push!(nbFrame5, vbox5)
+            push!(nb, nbFrame5, "Security")
+
+            ############################################################################
+            # Tab 6
+            ############################################################################
+            nbFrame6 = Frame()
+            screen = Gtk.GAccessor.style_context(nbFrame6)
+            push!(screen, StyleProvider(provider), 600)
+
+            vbox6 = Grid()
+
+            push!(nbFrame6, vbox6)
+            push!(nb, nbFrame6, "Results")
 
             gridToolbar[1, 2] = nb
             push!(newWin, gridToolbar)
@@ -380,12 +442,42 @@ function EthylDynamic()
             # Back for newWin
             newGBack = Button("Back")
             set_gtk_property!(newGBack, :width_request, 100)
+            signal_connect(newGBack, :clicked) do widget
+                global nb
+                idTab = get_gtk_property(nb, :page, Int)
+
+                if idTab !== 0
+                    global idTab = idTab-1
+                    set_gtk_property!(nb, :page, idTab)
+                    set_gtk_property!(newGNext, :sensitive, false)
+                end
+
+                if idTab == 0
+                    set_gtk_property!(newGBack, :sensitive, false)
+                end
+            end
+
             screen = Gtk.GAccessor.style_context(newGBack)
             push!(screen, StyleProvider(provider), 600)
 
             # Next for newWin
             newGNext = Button("Next")
             set_gtk_property!(newGNext, :width_request, 100)
+            signal_connect(newGNext, :clicked) do widget
+                global nb
+                idTab = get_gtk_property(nb, :page, Int)
+
+                if idTab !== 3
+                    global idTab = idTab+1
+                    set_gtk_property!(nb, :page, idTab)
+                    set_gtk_property!(newGBack, :sensitive, true)
+                end
+
+                if idTab == 3
+                    set_gtk_property!(newGNext, :sensitive, false)
+                end
+            end
+
             screen = Gtk.GAccessor.style_context(newGNext)
             push!(screen, StyleProvider(provider), 600)
 

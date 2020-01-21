@@ -1,25 +1,35 @@
 button {
-	font: 16px Sans;
+	font-size: 15px;
 	color: white;
-	background: #B2C3E4;
-	border-width: 0px;
+	background: #B3B2B3;
+	border-width: 1px;
+	border-style: solid;
+	border-color: black;
 	border-radius: 4px;
+	box-shadow: none;
 }
 
 button:hover {
-	font: 16px Sans;
+	font-size: 15px;
 	color: white;
-	background-color: #B2DDE4;
-	border-width: 0px;
+	background-color: #9F7FCA;
+	border-width: 1px;
+	border-style: solid;
+	border-color: black;
 	border-radius: 4px;
+	box-shadow: none;
 }
 
-button:hover#close, button:hover#closeAbout, button:hover#newGClose, button:hover#newGExit {
-	font: 16px Sans;
+button:hover#close, button:hover#closeAbout,
+button:hover#newGClose, button:hover#newGExit {
+	font-size: 15px;
 	color: white;
 	background-color: #F67FA5;
-	border-width: 0px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: black;
 	border-radius: 4px;
+	box-shadow: none;
 }
 
 window {
@@ -31,6 +41,46 @@ label {
 	color: gray;
 }
 
-grid {
-	background-color: #E2E2E2;
+notebook header tabs tab {
+	font-size: 15px;
+	font-weight: bold;
+	color: white;
+	background: gray;
+	border-width: 1px;
+	border-style: solid;
+	border-color: black;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 0px;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 0px;
+}
+
+notebook header tabs tab:checked{
+	font-size: 15px;
+	font-weight: bold;
+	color: white;
+	background: #7FB8CA;
+	border-width: 1px;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 0px;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 0px;
+}
+
+notebook header tabs tab:hover{
+	font-size: 15px;
+	font-weight: bold;
+	color: white;
+	background-color: #9F7FCA;
+	border-width: 1px;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 0px;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 0px;
+}
+
+frame {
+	border-color: gray;
+	border-width: 1px;
+	border-style: solid;
 }
