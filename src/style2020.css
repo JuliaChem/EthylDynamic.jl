@@ -161,7 +161,7 @@ notebook header tabs tab:hover {
 frame {
 	border-color: gray;
 	background-color: white;
-	border-width: 1px;
+	border-width: 2px;
 	border-style: solid;
 }
 
