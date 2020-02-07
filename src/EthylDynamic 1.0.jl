@@ -1,9 +1,12 @@
-using Gtk.ShortNames, JLD, Suppressor
+using Gtk.ShortNames, JLD, Suppressor, CSV, Mustache
 import DataFrames
 
 # Path to CSS Gtk-Style dataFile
 global style_file = joinpath(dirname(Base.source_path()), "style2020.css")
 global img = Gtk.Image(joinpath(dirname(Base.source_path()), "media\\mainlogo.png"))
+
+# General Settings
+global settings = JLD.load(joinpath(dirname(Base.source_path()), "dataFile.jld"), "dataFile")
 
 # Environmental variable to allow Windows decorations
 ENV["GTK_CSD"] = 0
@@ -25,6 +28,7 @@ function EthylDynamic()
     set_gtk_property!(mainWin, :window_position, 3)
     set_gtk_property!(mainWin, :accept_focus, true)
     set_gtk_property!(mainWin, :resizable, false)
+    set_gtk_property!(mainWin, :visible, false)
     screen = Gtk.GAccessor.style_context(mainWin)
     push!(screen, StyleProvider(provider), 600)
 
@@ -97,8 +101,7 @@ function EthylDynamic()
         set_gtk_property!(newWin, :width_request, 1200)
         set_gtk_property!(newWin, :accept_focus, true)
         set_gtk_property!(newWin, :resizable, false)
-
-        set_gtk_property!(mainWin, :visible, false)
+        set_gtk_property!(newWin, :visible, false)
         #screen = Gtk.GAccessor.style_context(newWin)
         #push!(screen, StyleProvider(provider), 600)
 
@@ -225,21 +228,21 @@ function EthylDynamic()
 
         # Frame for databank
         vbox1Frame1 = Frame("Databank")
-        set_gtk_property!(vbox1Frame1, :width_request, 880)
         set_gtk_property!(vbox1Frame1, :height_request, 340)
         set_gtk_property!(vbox1Frame1, :label_xalign, 0.50)
         set_gtk_property!(vbox1Frame1, :shadow_type, 0)
 
         # Frame for compouns
-        vbox1Frame2 = Frame("Added Compounds")
-        set_gtk_property!(vbox1Frame2, :width_request, 800)
+        vbox1Frame2 = Frame("Added Components")
         set_gtk_property!(vbox1Frame2, :height_request, 280)
         set_gtk_property!(vbox1Frame2, :label_xalign, 0.50)
         set_gtk_property!(vbox1Frame2, :shadow_type, 0)
 
+        # Separador (decorator)
         sep = Frame()
         set_gtk_property!(sep, :width_request, 1000)
         set_gtk_property!(sep, :height_request, 0)
+
         ############################################################################
         # Datasheet vbox1Frame1
         gridDatabank = Grid()
@@ -259,16 +262,20 @@ function EthylDynamic()
         frameDatabank = Frame()
 
         # GtkListStore where the data is actually saved
-        global listDatabank = ListStore(Float64, String, Float64, Float64)
+        global listDatabank = ListStore(String, String, Float64, Float64, Float64, Float64,
+                                Float64, Float64, Float64)
 
-        # Data for example
-        push!(listDatabank, (1, "Water", 1, 1))
-        push!(listDatabank, (2, "Cerveza", 4, 6))
-        push!(listDatabank, (3, "Alcohol", 7, 3))
-        push!(listDatabank, (4, "Vocka", 12, 1))
+        # Load default database
+        global database = CSV.read(settings.pathDatabase[1])
+
+        for i=1:size(database)[1]
+            push!(listDatabank, (database[i,1], database[i,2], database[i,3],
+            database[i,4], database[i,5], database[i,6], database[i,7],
+            database[i,8], database[i,9]))
+        end
 
         # Gtk TreeView to show the graphical element
-        viewDatabank = TreeView(TreeModel(listDatabank))
+        global viewDatabank = TreeView(TreeModel(listDatabank))
         set_gtk_property!(viewDatabank, :enable_grid_lines, 3)
         set_gtk_property!(viewDatabank, :enable_search, true)
         screen = Gtk.GAccessor.style_context(viewDatabank)
@@ -276,33 +283,25 @@ function EthylDynamic()
 
         # Window that allow scroll the TreeView
         scrollDatabank = ScrolledWindow(viewDatabank)
-        set_gtk_property!(scrollDatabank, :width_request, 600)
+        set_gtk_property!(scrollDatabank, :width_request, 750)
         set_gtk_property!(scrollDatabank, :height_request, 250)
         selection1 = Gtk.GAccessor.selection(viewDatabank)
-
-        signal_connect(selection1, "changed") do widget
-            if hasselection(selection1)
-                currentIt = selected(selection1)
-
-                println(
-                    "Name: ",
-                    TreeModel(listDatabank)[currentIt, 1],
-                    " Age: ",
-                    TreeModel(listDatabank)[currentIt, 1],
-                )
-            end
-        end
 
         # Column definitions
         cTxt1 = CellRendererText()
 
-        c11 = TreeViewColumn("ID", cTxt1, Dict([("text", 0)]))
+        c11 = TreeViewColumn("Molecule", cTxt1, Dict([("text", 0)]))
         c12 = TreeViewColumn("Name", cTxt1, Dict([("text", 1)]))
         c13 = TreeViewColumn("MW", cTxt1, Dict([("text", 2)]))
-        c14 = TreeViewColumn("Tc", cTxt1, Dict([("text", 3)]))
+        c14 = TreeViewColumn("ω", cTxt1, Dict([("text", 3)]))
+        c15 = TreeViewColumn("Tc [K]", cTxt1, Dict([("text", 4)]))
+        c16 = TreeViewColumn("Pc [bar]", cTxt1, Dict([("text", 5)]))
+        c17 = TreeViewColumn("Zc", cTxt1, Dict([("text", 6)]))
+        c18 = TreeViewColumn("Vc [cm^3/mol]", cTxt1, Dict([("text", 7)]))
+        c19 = TreeViewColumn("Tn [K]", cTxt1, Dict([("text", 8)]))
 
         # Add column to TreeView
-        push!(viewDatabank, c11, c12, c13, c14)
+        push!(viewDatabank, c11, c12, c13, c14, c15, c16, c17, c18, c19)
 
         # Add scrool window to the frame
         push!(frameDatabank, scrollDatabank)
@@ -318,16 +317,65 @@ function EthylDynamic()
         loadDatabank = Button("Search")
 
         openDatabank = ToolButton("gtk-open")
+        signal_connect(openDatabank, :clicked) do widget
+            global pathDatabase = open_dialog_native("Pick a file", Null(), ("*.csv",))
+
+            if ~isempty(pathDatabase)
+                @sigatom selection1 = Gtk.GAccessor.selection(viewDatabank)
+                @sigatom selection1 = Gtk.GAccessor.mode(
+                    selection1,
+                    Gtk.GConstants.GtkSelectionMode.NONE,
+                )
+                empty!(listDatabank)
+
+                global database = CSV.read(pathDatabase)
+
+                for i=1:size(database)[1]
+                    push!(listDatabank, (database[i,1], database[i,2], database[i,3],
+                    database[i,4], database[i,5], database[i,6], database[i,7],
+                    database[i,8], database[i,9]))
+                end
+
+                @sigatom selection1 = Gtk.GAccessor.selection(viewDatabank)
+                @sigatom selection1 = Gtk.GAccessor.mode(
+                    selection1,
+                    Gtk.GConstants.GtkSelectionMode.SINGLE,
+                )
+            end
+        end
 
         addDatabank = ToolButton("gtk-add")
 
         remDatabank = ToolButton("gtk-remove")
+        signal_connect(remDatabank, :clicked) do widget
+            if hasselection(selection1)
+                global listDatabank
+                currentIt = selected(selection1)
+                deleteat!(listDatabank, currentIt)
+            end
+        end
 
         newDatabank = ToolButton("gtk-new")
 
         editDatabank = ToolButton("gtk-edit")
 
         selectDatabank = ToolButton("gtk-go-down")
+        signal_connect(selectDatabank, :clicked) do widget
+            if hasselection(selection1)
+                global viewComp
+                currentIt = selected(selection1)
+
+                push!(listComp, (listDatabank[currentIt, 1],listDatabank[currentIt, 2],
+                listDatabank[currentIt, 3],listDatabank[currentIt, 4],listDatabank[currentIt, 5],
+                listDatabank[currentIt, 6],listDatabank[currentIt, 7],listDatabank[currentIt, 8],
+                listDatabank[currentIt, 9]))
+
+                selection2 = Gtk.GAccessor.selection(viewComp)
+                selection2 = Gtk.GAccessor.mode(
+                    selection2,
+                    Gtk.GConstants.GtkSelectionMode.SINGLE)
+            end
+        end
 
         saveDatabank = ToolButton("gtk-floppy")
 
@@ -400,16 +448,11 @@ function EthylDynamic()
         frameComp = Frame()
 
         # GtkListStore where the data is actually saved
-        listComp = ListStore(Float64, String, Float64, Float64)
-
-        # Data for example
-        push!(listComp, (1, "Water", 1, 1))
-        push!(listComp, (2, "Cerveza", 4, 6))
-        push!(listComp, (3, "Alcohol", 7, 3))
-        push!(listComp, (4, "Vocka", 12, 1))
+        global listComp = ListStore(String, String, Float64, Float64, Float64, Float64,
+                                Float64, Float64, Float64)
 
         # Gtk TreeView to show the graphical element
-        viewComp = TreeView(TreeModel(listComp))
+        global viewComp = TreeView(TreeModel(listComp))
         set_gtk_property!(viewComp, :enable_grid_lines, 3)
         set_gtk_property!(viewComp, :enable_search, true)
         screen = Gtk.GAccessor.style_context(viewComp)
@@ -417,23 +460,29 @@ function EthylDynamic()
 
         # Window that allow scroll the TreeView
         scrollComp = ScrolledWindow(viewComp)
-        set_gtk_property!(scrollComp, :width_request, 600)
+        set_gtk_property!(scrollComp, :width_request, 750)
         set_gtk_property!(scrollComp, :height_request, 250)
         selection2 = Gtk.GAccessor.selection(viewComp)
         selection2 = Gtk.GAccessor.mode(
             selection2,
-            Gtk.GConstants.GtkSelectionMode.MULTIPLE,
+            Gtk.GConstants.GtkSelectionMode.SINGLE,
         )
 
         # Column definitions
-        cel1 = CellRendererText()
-        c21 = TreeViewColumn("ID", cel1, Dict([("text", 0)]))
-        c22 = TreeViewColumn("Name", cel1, Dict([("text", 1)]))
-        c23 = TreeViewColumn("MW", cel1, Dict([("text", 2)]))
-        c24 = TreeViewColumn("Tc", cel1, Dict([("text", 3)]))
+        cTxt2 = CellRendererText()
+
+        c21 = TreeViewColumn("Molecule", cTxt2, Dict([("text", 0)]))
+        c22 = TreeViewColumn("Name", cTxt2, Dict([("text", 1)]))
+        c23 = TreeViewColumn("MW", cTxt2, Dict([("text", 2)]))
+        c24 = TreeViewColumn("ω", cTxt2, Dict([("text", 3)]))
+        c25 = TreeViewColumn("Tc [K]", cTxt2, Dict([("text", 4)]))
+        c26 = TreeViewColumn("Pc [bar]", cTxt2, Dict([("text", 5)]))
+        c27 = TreeViewColumn("Zc", cTxt2, Dict([("text", 6)]))
+        c28 = TreeViewColumn("Vc [cm^3/mol]", cTxt2, Dict([("text", 7)]))
+        c29 = TreeViewColumn("Tn [K]", cTxt2, Dict([("text", 8)]))
 
         # Add column to TreeView
-        push!(viewComp, c21, c22, c23, c24)
+        push!(viewComp, c21, c22, c23, c24, c25, c26, c27, c28, c29)
 
         # Add scrool window to the frame
         push!(frameComp, scrollComp)
@@ -448,6 +497,13 @@ function EthylDynamic()
         csvComp = ToolButton("gtk-redo")
 
         remComp = ToolButton("gtk-remove")
+        signal_connect(remComp, :clicked) do widget
+            if hasselection(selection2)
+                global listComp
+                currentIt = selected(selection2)
+                deleteat!(listComp, currentIt)
+            end
+        end
 
         addComp = ToolButton("gtk-add")
 
@@ -775,6 +831,7 @@ function EthylDynamic()
         gridToolbar[1, 3] = newGButtons
 
         Gtk.showall(newWin)
+        set_gtk_property!(newWin :visible, true)
     end
 
         ############################################################################
@@ -884,13 +941,3 @@ function EthylDynamic()
     Gtk.showall(mainWin)
     #end
 end
-
-dataFile = joinpath(dirname(Base.source_path()), "dataBank.jld")
-
-dataBank = DataFrames.DataFrame()
-
-dataBank.Compound = ["Water", "Methanol"]
-dataBank.MW = [12, 32]
-
-JLD.save(dataFile, "dataBankBackup", dataBank)
-d = JLD.load(dataFile, "dataBankBackup")
