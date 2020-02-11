@@ -110,6 +110,18 @@ label {
 	color: gray;
 }
 
+label#nameUser, label#simName, label#dirName, label#compName, label#dateName {
+	font: 14px Serif;
+	border: 1px solid gray;
+	color: black;
+}
+
+label#notesName {
+	font: 14px Serif;
+	border: 1px solid gray;
+	color: black;
+}
+
 /* CSS Style for notebook headers tabs*/
 notebook header tabs tab {
 	box-shadow: 0px 0px;
@@ -165,10 +177,19 @@ frame {
 	border-style: solid;
 }
 
-/* CSS Style for treeview (under test)*/
-/*treeview.view header {
-	border-color: Red;
-	font-weight: bold;
-	color: Cyan;
-	font-size: 20px;
-}*/
+frame#frameLogging {
+	border-color: black;
+	border-width: 1px;
+	border-style: solid;
+}
+
+scrolledwindow {
+	background-color: rgb(235, 235, 235);
+	border-color: gray;
+	border-width: 1px;
+}
+
+entry {
+	background-color: rgb(235, 235, 235);
+	border-color: gray;
+}

@@ -1,4 +1,4 @@
-using Gtk.ShortNames, JLD, Suppressor, CSV, Mustache
+using Gtk, Gtk.ShortNames, JLD, Suppressor, CSV, Mustache, Dates
 import DataFrames
 
 # Path to CSS Gtk-Style dataFile
@@ -6,7 +6,13 @@ global style_file = joinpath(dirname(Base.source_path()), "style2020.css")
 global img = Gtk.Image(joinpath(dirname(Base.source_path()), "media\\mainlogo.png"))
 
 # General Settings
-global settings = JLD.load(joinpath(dirname(Base.source_path()), "dataFile.jld"), "dataFile")
+global settings = JLD.load(
+    joinpath(dirname(Base.source_path()), "dataFile.jld"),
+    "dataFile",
+)
+
+# Load default database
+global database = CSV.read(settings.pathDatabase[1])
 
 # Environmental variable to allow Windows decorations
 ENV["GTK_CSD"] = 0
@@ -95,13 +101,12 @@ function EthylDynamic()
 
         newWin = Window()
         # Properties for mainWin
-        set_gtk_property!(newWin, :title, "EthylDynamic 1.0")
+        set_gtk_property!(newWin, :title, "EthylDynamic 1.0 - *Untitled")
         set_gtk_property!(newWin, :window_position, 3)
         set_gtk_property!(newWin, :height_request, 800)
         set_gtk_property!(newWin, :width_request, 1200)
         set_gtk_property!(newWin, :accept_focus, true)
         set_gtk_property!(newWin, :resizable, false)
-        set_gtk_property!(newWin, :visible, false)
         #screen = Gtk.GAccessor.style_context(newWin)
         #push!(screen, StyleProvider(provider), 600)
 
@@ -121,6 +126,7 @@ function EthylDynamic()
             :tooltip_markup,
             "Save the current state environment to a JLD file",
         )
+        set_gtk_property!(tb3, :sensitive, false)
 
         # Close toolbar
         tb4 = ToolButton("gtk-close")
@@ -131,6 +137,7 @@ function EthylDynamic()
             destroy(newWin)
             set_gtk_property!(mainWin, :visible, true)
         end
+
         signal_connect(newWin, "key-press-event") do widget, event
             if event.keyval == 65307
                 destroy(newWin)
@@ -153,7 +160,6 @@ function EthylDynamic()
         tb8 = ToolButton("gtk-preferences")
         set_gtk_property!(tb8, :label, "Tools")
         set_gtk_property!(tb8, :tooltip_markup, "Simulation environtment tools")
-
 
         # Toolbar
         newToolbar = Toolbar()
@@ -181,7 +187,7 @@ function EthylDynamic()
         push!(frameToolbar, newToolbar)
         gridToolbar[1, 1] = frameToolbar
 
-        # Notebook
+        # newNotebook
         global nb = Notebook()
         set_gtk_property!(nb, :tab_pos, 0)
         screen = Gtk.GAccessor.style_context(nb)
@@ -194,22 +200,120 @@ function EthylDynamic()
         screen = Gtk.GAccessor.style_context(nbFrame0)
         push!(screen, StyleProvider(provider), 600)
 
+        vbox00 = Grid()
+        set_gtk_property!(vbox00, :column_homogeneous, false)
+        set_gtk_property!(vbox00, :row_homogeneous, false)
+        set_gtk_property!(vbox00, :halign, 3)
+        set_gtk_property!(vbox00, :valign, 3)
+        set_gtk_property!(vbox00, :row_spacing, 20)
+
         vbox0 = Grid()
         set_gtk_property!(vbox0, :column_homogeneous, false)
         set_gtk_property!(vbox0, :row_homogeneous, false)
         set_gtk_property!(vbox0, :column_spacing, 10)
         set_gtk_property!(vbox0, :row_spacing, 10)
-        set_gtk_property!(vbox0, :margin_top, 10)
+        set_gtk_property!(vbox0, :margin_top, 20)
         set_gtk_property!(vbox0, :margin_bottom, 20)
         set_gtk_property!(vbox0, :margin_left, 20)
         set_gtk_property!(vbox0, :margin_right, 20)
         set_gtk_property!(vbox0, :halign, 3)
 
-        push!(nbFrame0, vbox0)
+        nameUser = Label("Username:")
+        set_gtk_property!(nameUser, :name, "nameUser")
+        screen = Gtk.GAccessor.style_context(nameUser)
+        push!(screen, StyleProvider(provider), 600)
+
+        nameUserEntry = Entry()
+        screen = Gtk.GAccessor.style_context(nameUserEntry)
+        push!(screen, StyleProvider(provider), 600)
+
+        simName = Label("Simulation Name:")
+        set_gtk_property!(simName, :name, "simName")
+        screen = Gtk.GAccessor.style_context(simName)
+        push!(screen, StyleProvider(provider), 600)
+
+        simUserEntry = Entry()
+        screen = Gtk.GAccessor.style_context(simUserEntry)
+        push!(screen, StyleProvider(provider), 600)
+
+        dirName = Label("Directory:")
+        set_gtk_property!(dirName, :name, "dirName")
+        screen = Gtk.GAccessor.style_context(dirName)
+        push!(screen, StyleProvider(provider), 600)
+
+        dirNameEntry = Entry()
+        screen = Gtk.GAccessor.style_context(dirNameEntry)
+        push!(screen, StyleProvider(provider), 600)
+
+        compName = Label("Company:")
+        set_gtk_property!(compName, :name, "compName")
+        screen = Gtk.GAccessor.style_context(compName)
+        push!(screen, StyleProvider(provider), 600)
+
+        compNameEntry = Entry()
+        screen = Gtk.GAccessor.style_context(compNameEntry)
+        push!(screen, StyleProvider(provider), 600)
+
+        dateName = Label("Date:")
+        set_gtk_property!(dateName, :name, "dateName")
+        set_gtk_property!(dateName, :width_request, 200)
+        screen = Gtk.GAccessor.style_context(dateName)
+        push!(screen, StyleProvider(provider), 600)
+
+        dateNameEntry = Entry()
+        set_gtk_property!(dateNameEntry, :editable, false)
+        set_gtk_property!(dateNameEntry, :width_request, 700)
+        screen = Gtk.GAccessor.style_context(dateNameEntry)
+        push!(screen, StyleProvider(provider), 600)
+
+        notesName = Label("Notes:")
+        set_gtk_property!(notesName, :name, "notesName")
+        screen = Gtk.GAccessor.style_context(notesName)
+        push!(screen, StyleProvider(provider), 600)
+
+        # TODO wrap text
+        notesNameEntry = Entry()
+        set_gtk_property!(notesNameEntry, :height_request, 200)
+        screen = Gtk.GAccessor.style_context(notesNameEntry)
+        push!(screen, StyleProvider(provider), 600)
+
+        timenow = Dates.now()
+        timenow1 = Dates.format(timenow, "dd u yyyy HH:MM:SS")
+        set_gtk_property!(dateNameEntry, :text, timenow1)
+
+        vbox0[1, 1] = nameUser
+        vbox0[2, 1] = nameUserEntry
+        vbox0[1, 2] = simName
+        vbox0[2, 2] = simUserEntry
+        vbox0[1, 3] = dirName
+        vbox0[2, 3] = dirNameEntry
+        vbox0[1, 4] = compName
+        vbox0[2, 4] = compNameEntry
+        vbox0[1, 5] = dateName
+        vbox0[2, 5] = dateNameEntry
+        vbox0[1, 6] = notesName
+        vbox0[2, 6:12] = notesNameEntry
+
+        vbox00[1:30, 1] = vbox0
+        # Separador (decorator)
+        sep0 = Frame()
+        set_gtk_property!(sep0, :width_request, 1000)
+        set_gtk_property!(sep0, :height_request, 0)
+
+        #vbox00[1:12, 2] = sep0
+
+
+        saveStartup = ToolButton("gtk-floppy")
+        clearStartup = ToolButton("gtk-clear")
+
+        vbox00[29, 3] = clearStartup
+        vbox00[30, 3] = saveStartup
+
+        push!(nbFrame0, vbox00)
         push!(nb, nbFrame0, "Startup")
 
         ############################################################################
-        # Tab 1 - Compounds
+        # Tab 1
         ############################################################################
         nbFrame1 = Frame()
         screen = Gtk.GAccessor.style_context(nbFrame1)
@@ -228,13 +332,13 @@ function EthylDynamic()
 
         # Frame for databank
         vbox1Frame1 = Frame("Databank")
-        set_gtk_property!(vbox1Frame1, :height_request, 340)
+        #set_gtk_property!(vbox1Frame1, :height_request, 340)
         set_gtk_property!(vbox1Frame1, :label_xalign, 0.50)
         set_gtk_property!(vbox1Frame1, :shadow_type, 0)
 
         # Frame for compouns
         vbox1Frame2 = Frame("Added Components")
-        set_gtk_property!(vbox1Frame2, :height_request, 280)
+        #set_gtk_property!(vbox1Frame2, :height_request, 280)
         set_gtk_property!(vbox1Frame2, :label_xalign, 0.50)
         set_gtk_property!(vbox1Frame2, :shadow_type, 0)
 
@@ -262,16 +366,33 @@ function EthylDynamic()
         frameDatabank = Frame()
 
         # GtkListStore where the data is actually saved
-        global listDatabank = ListStore(String, String, Float64, Float64, Float64, Float64,
-                                Float64, Float64, Float64)
+        global listDatabank = ListStore(
+            String,
+            String,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+        )
 
-        # Load default database
-        global database = CSV.read(settings.pathDatabase[1])
-
-        for i=1:size(database)[1]
-            push!(listDatabank, (database[i,1], database[i,2], database[i,3],
-            database[i,4], database[i,5], database[i,6], database[i,7],
-            database[i,8], database[i,9]))
+        for i = 1:size(database)[1]
+            push!(
+                listDatabank,
+                (
+                 database[i, 1],
+                 database[i, 2],
+                 database[i, 3],
+                 database[i, 4],
+                 database[i, 5],
+                 database[i, 6],
+                 database[i, 7],
+                 database[i, 8],
+                 database[i, 9],
+                ),
+            )
         end
 
         # Gtk TreeView to show the graphical element
@@ -330,10 +451,21 @@ function EthylDynamic()
 
                 global database = CSV.read(pathDatabase)
 
-                for i=1:size(database)[1]
-                    push!(listDatabank, (database[i,1], database[i,2], database[i,3],
-                    database[i,4], database[i,5], database[i,6], database[i,7],
-                    database[i,8], database[i,9]))
+                for i = 1:size(database)[1]
+                    push!(
+                        listDatabank,
+                        (
+                         database[i, 1],
+                         database[i, 2],
+                         database[i, 3],
+                         database[i, 4],
+                         database[i, 5],
+                         database[i, 6],
+                         database[i, 7],
+                         database[i, 8],
+                         database[i, 9],
+                        ),
+                    )
                 end
 
                 @sigatom selection1 = Gtk.GAccessor.selection(viewDatabank)
@@ -365,17 +497,74 @@ function EthylDynamic()
                 global viewComp
                 currentIt = selected(selection1)
 
-                push!(listComp, (listDatabank[currentIt, 1],listDatabank[currentIt, 2],
-                listDatabank[currentIt, 3],listDatabank[currentIt, 4],listDatabank[currentIt, 5],
-                listDatabank[currentIt, 6],listDatabank[currentIt, 7],listDatabank[currentIt, 8],
-                listDatabank[currentIt, 9]))
+                push!(
+                    listComp,
+                    (
+                     listDatabank[currentIt, 1],
+                     listDatabank[currentIt, 2],
+                     listDatabank[currentIt, 3],
+                     listDatabank[currentIt, 4],
+                     listDatabank[currentIt, 5],
+                     listDatabank[currentIt, 6],
+                     listDatabank[currentIt, 7],
+                     listDatabank[currentIt, 8],
+                     listDatabank[currentIt, 9],
+                    ),
+                )
 
                 selection2 = Gtk.GAccessor.selection(viewComp)
                 selection2 = Gtk.GAccessor.mode(
                     selection2,
-                    Gtk.GConstants.GtkSelectionMode.SINGLE)
+                    Gtk.GConstants.GtkSelectionMode.SINGLE,
+                )
             end
         end
+
+        # Functions to reacts to double click and add the selected component
+        function activate_row_cb(widgetptr::Ptr, path::Ptr, column::Ptr, user_data)
+            tv = convert(GtkTreeView, widgetptr)
+            ls = user_data
+
+            selection = Gtk.GAccessor.selection(tv)
+
+            if hasselection(selection)
+                global viewComp
+
+                currentIt = selected(selection)
+                push!(
+                    listComp,
+                    (
+                     ls[currentIt, 1],
+                     ls[currentIt, 2],
+                     ls[currentIt, 3],
+                     ls[currentIt, 4],
+                     ls[currentIt, 5],
+                     ls[currentIt, 6],
+                     ls[currentIt, 7],
+                     ls[currentIt, 8],
+                     ls[currentIt, 9],
+                    ),
+                )
+
+                global selection2 = Gtk.GAccessor.selection(viewComp)
+                selection2 = Gtk.GAccessor.mode(
+                    selection2,
+                    Gtk.GConstants.GtkSelectionMode.SINGLE,
+                )
+            end
+            nothing
+        end
+
+        # Call to activate_row_cb
+        signal_connect(
+            activate_row_cb,
+            viewDatabank,
+            "row-activated",
+            Nothing,
+            (Ptr{GtkTreePath}, Ptr{GtkTreeViewColumn}),
+            false,
+            listDatabank,
+        )
 
         saveDatabank = ToolButton("gtk-floppy")
 
@@ -404,7 +593,6 @@ function EthylDynamic()
         gridDataButtons[1, 4] = editDatabank
         gridDataButtons[1, 5] = saveDatabank
         gridDataButtons[1, 6] = csvDatabank
-
         gridDataButtons[4, 2] = remDatabank
         gridDataButtons[4, 3] = addDatabank
         gridDataButtons[4, 4] = selectDatabank
@@ -448,8 +636,17 @@ function EthylDynamic()
         frameComp = Frame()
 
         # GtkListStore where the data is actually saved
-        global listComp = ListStore(String, String, Float64, Float64, Float64, Float64,
-                                Float64, Float64, Float64)
+        global listComp = ListStore(
+            String,
+            String,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+        )
 
         # Gtk TreeView to show the graphical element
         global viewComp = TreeView(TreeModel(listComp))
@@ -582,7 +779,6 @@ function EthylDynamic()
         push!(nbFrame2, vbox2)
         push!(nb, nbFrame2, "Equipments")
 
-
         vbox2Button1 = Button("Separators")
         set_gtk_property!(vbox2Button1, :name, "Separators")
         set_gtk_property!(vbox2Button1, :width_request, 100)
@@ -625,7 +821,6 @@ function EthylDynamic()
         vbox2[4, 1] = vbox2Button4
         vbox2[5, 1] = vbox2Button5
 
-
         ############################################################################
         # Tab 3 - Flowsheet
         ############################################################################
@@ -657,7 +852,7 @@ function EthylDynamic()
         vbox4 = Grid()
 
         push!(nbFrame4, vbox4)
-        push!(nb, nbFrame4, "Thermodynamics")
+        # push!(nb, nbFrame4, "Thermodynamics")
 
         ############################################################################
         # Tab 5 - Security
@@ -687,12 +882,147 @@ function EthylDynamic()
         push!(screen, StyleProvider(provider), 600)
 
         vbox6 = Grid()
+        set_gtk_property!(vbox6, :halign, 3)
+        set_gtk_property!(vbox6, :valign, 3)
+
+        # newNotebook
+        global nbResults = Notebook()
+        nbResultsFrameTable = Frame()
+        set_gtk_property!(nbResults, :width_request, 1080)
+        set_gtk_property!(nbResults, :height_request, 650)
+
+        gridResTable = Grid()
+        set_gtk_property!(gridResTable, :column_homogeneous, false)
+        set_gtk_property!(gridResTable, :row_homogeneous, false)
+        set_gtk_property!(gridResTable, :column_spacing, 50)
+        set_gtk_property!(gridResTable, :row_spacing, 20)
+        set_gtk_property!(gridResTable, :margin_top, 20)
+        set_gtk_property!(gridResTable, :margin_bottom, 20)
+        set_gtk_property!(gridResTable, :margin_left, 20)
+        set_gtk_property!(gridResTable, :margin_right, 20)
+        set_gtk_property!(gridResTable, :halign, 3)
+        set_gtk_property!(gridResTable, :valign, 3)
+
+        ##################################################################################
+        # TreeView for Tables (nbResults)
+        listBlocksREs = ListStore(String, String, String)
+
+        viewBlocksRes = TreeView(TreeModel(listBlocksREs))
+        set_gtk_property!(viewBlocksRes, :enable_grid_lines, 3)
+        set_gtk_property!(viewBlocksRes, :enable_search, true)
+
+        # Window that allow scroll the TreeView
+        scrollBlocksRes = ScrolledWindow(viewBlocksRes)
+        set_gtk_property!(scrollBlocksRes, :width_request, 350)
+        set_gtk_property!(scrollBlocksRes, :height_request, 250)
+        selection3 = Gtk.GAccessor.selection(viewBlocksRes)
+
+        # Column definitions
+        cTxtREs1 = CellRendererText()
+
+        cRes1 = TreeViewColumn("ID", cTxtREs1, Dict([("text", 0)]))
+        cRes2 = TreeViewColumn("Name", cTxtREs1, Dict([("text", 1)]))
+        cRes3 = TreeViewColumn("Type", cTxtREs1, Dict([("text", 2)]))
+
+        # Add column to TreeView
+        push!(viewBlocksRes, cRes1, cRes2, cRes3)
+
+        # Frame for viewBlocksRes
+        frameBlocksRes = Frame("Table X. Block")
+        set_gtk_property!(frameBlocksRes, :label_xalign, 0.50)
+        set_gtk_property!(frameBlocksRes, :shadow_type, 0)
+
+        frameViewBlocksRes = Frame()
+
+        push!(frameBlocksRes, frameViewBlocksRes)
+        push!(frameViewBlocksRes, scrollBlocksRes)
+
+        ##################################################################################
+        # TreeView for Tables (nbResults)
+        listStreamsRes = ListStore(String, String, String)
+
+        viewStreamsRes = TreeView(TreeModel(listStreamsRes))
+        set_gtk_property!(viewStreamsRes, :enable_grid_lines, 3)
+        set_gtk_property!(viewStreamsRes, :enable_search, true)
+
+        # Window that allow scroll the TreeView
+        scrollStreamsRes = ScrolledWindow(viewStreamsRes)
+        set_gtk_property!(scrollStreamsRes, :width_request, 350)
+        set_gtk_property!(scrollStreamsRes, :height_request, 250)
+        selection4 = Gtk.GAccessor.selection(viewStreamsRes)
+
+        # Column definitions
+        cTxtREs2 = CellRendererText()
+
+        cResStr1 = TreeViewColumn("ID", cTxtREs2, Dict([("text", 0)]))
+        cResStr2 = TreeViewColumn("Name", cTxtREs2, Dict([("text", 1)]))
+        cResStr3 = TreeViewColumn("Type", cTxtREs2, Dict([("text", 2)]))
+
+        # Add column to TreeView
+        push!(viewStreamsRes, cResStr1, cResStr2, cResStr3)
+
+        # Frame for viewBlocksRes
+        frameStreamsRes = Frame("Table X. Streams")
+        set_gtk_property!(frameStreamsRes, :label_xalign, 0.50)
+        set_gtk_property!(frameStreamsRes, :shadow_type, 0)
+
+        frameViewStreamsRes = Frame()
+
+        push!(frameStreamsRes, frameViewStreamsRes)
+        push!(frameViewStreamsRes, scrollStreamsRes)
+
+        ##################################################################################
+        # TreeView for Tables (nbResults)
+        listResTable = ListStore(String, String, String)
+
+        viewResTable = TreeView(TreeModel(listResTable))
+        set_gtk_property!(viewResTable, :enable_grid_lines, 3)
+        set_gtk_property!(viewResTable, :enable_search, true)
+
+        # Window that allow scroll the TreeView
+        scrollResTable = ScrolledWindow(viewResTable)
+        set_gtk_property!(scrollResTable, :width_request, 350)
+        set_gtk_property!(scrollResTable, :height_request, 250)
+        selection4 = Gtk.GAccessor.selection(viewResTable)
+
+        # Column definitions
+        cTxtREs3 = CellRendererText()
+
+        cResTab1 = TreeViewColumn("Temperature", cTxtREs3, Dict([("text", 0)]))
+        cResTab2 = TreeViewColumn("Pressure", cTxtREs3, Dict([("text", 1)]))
+        cResTab3 = TreeViewColumn("XA Concentration", cTxtREs3, Dict([("text", 2)]))
+
+        # Add column to TreeView
+        push!(viewResTable, cResTab1, cResTab2, cResTab3)
+
+        # Frame for viewBlocksRes
+        frameResTable = Frame("Table X. Results")
+        set_gtk_property!(frameResTable, :label_xalign, 0.50)
+        set_gtk_property!(frameResTable, :shadow_type, 0)
+
+        frameViewResTable = Frame()
+
+        push!(frameResTable, frameViewResTable)
+        push!(frameViewResTable, scrollResTable)
+
+        ############
+        gridResTable[1, 1] = frameBlocksRes
+        gridResTable[1, 2] = frameStreamsRes
+        gridResTable[2, 1:2] = frameResTable
+
+        push!(nbResultsFrameTable, gridResTable)
+        push!(nbResults, nbResultsFrameTable, "Tables")
+
+        nbResultsFramePlots = Frame()
+        push!(nbResults, nbResultsFramePlots, "Graphs")
+
+        vbox6[1, 1] = nbResults
 
         push!(nbFrame6, vbox6)
         push!(nb, nbFrame6, "Results")
 
         ############################################################################
-        # Tab 0 - User properties
+        # Tab 7
         ############################################################################
         nbFrame7 = Frame()
         screen = Gtk.GAccessor.style_context(nbFrame7)
@@ -704,10 +1034,35 @@ function EthylDynamic()
         set_gtk_property!(vbox7, :column_spacing, 10)
         set_gtk_property!(vbox7, :row_spacing, 10)
         set_gtk_property!(vbox7, :margin_top, 10)
-        set_gtk_property!(vbox7, :margin_bottom, 20)
+        set_gtk_property!(vbox7, :margin_bottom, 10)
         set_gtk_property!(vbox7, :margin_left, 20)
         set_gtk_property!(vbox7, :margin_right, 20)
         set_gtk_property!(vbox7, :halign, 3)
+
+        labLogging = Label("Data Logging")
+        frameLogging = Frame()
+        set_gtk_property!(frameLogging, :name, "frameLogging")
+        screen = Gtk.GAccessor.style_context(frameLogging)
+        push!(screen, StyleProvider(provider), 600)
+
+        scrollLogging = ScrolledWindow()
+        set_gtk_property!(scrollLogging, :width_request, 1000)
+        set_gtk_property!(scrollLogging, :height_request, 540)
+        screen = Gtk.GAccessor.style_context(scrollLogging)
+        push!(screen, StyleProvider(provider), 600)
+
+        push!(frameLogging, scrollLogging)
+
+        # Buttons for logging
+        saveLog = ToolButton("gtk-floppy")
+        remLog = ToolButton("gtk-clear")
+        printLog = ToolButton("gtk-print")
+
+        vbox7[12, 1] = labLogging
+        vbox7[1:20, 2] = frameLogging
+        vbox7[18, 3] = remLog
+        vbox7[19, 3] = printLog
+        vbox7[20, 3] = saveLog
 
         push!(nbFrame7, vbox7)
         push!(nb, nbFrame7, "Data Logging")
@@ -831,12 +1186,12 @@ function EthylDynamic()
         gridToolbar[1, 3] = newGButtons
 
         Gtk.showall(newWin)
-        set_gtk_property!(newWin :visible, true)
+        set_gtk_property!(newWin:visible, true)
     end
 
-        ############################################################################
-        # Close mainWin
-        ############################################################################
+    ############################################################################
+    # Close mainWin
+    ############################################################################
     signal_connect(mainWin, "key-press-event") do widget, event
         if event.keyval == 65307
             destroy(mainWin)
@@ -848,10 +1203,10 @@ function EthylDynamic()
         destroy(mainWin)
     end
 
-        # TODO Checar texto y link
-        ############################################################################
-        # About mainWin
-        ############################################################################
+    # TODO Checar texto y link
+    ############################################################################
+    # About mainWin
+    ############################################################################
     signal_connect(about, :clicked) do widget
         aboutWin = Window()
         set_gtk_property!(aboutWin, :title, "About")
