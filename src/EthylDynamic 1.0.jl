@@ -1,3 +1,4 @@
+
 using Gtk, Gtk.ShortNames, JLD, Suppressor, CSV, Mustache, Dates
 import DataFrames
 
@@ -7,12 +8,11 @@ global img = Gtk.Image(joinpath(dirname(Base.source_path()), "media\\mainlogo.pn
 
 # General Settings
 global settings = JLD.load(
-    joinpath(dirname(Base.source_path()), "dataFile.jld"),
-    "dataFile",
-)
+    joinpath(dirname(Base.source_path()), "settings.jld"),
+    "dataFile")
 
 # Load default database
-global database = CSV.read(settings.pathDatabase[1])
+global  database = CSV.read(settings.pathDatabase[1])
 
 # Environmental variable to allow Windows decorations
 ENV["GTK_CSD"] = 0
@@ -815,11 +815,48 @@ function EthylDynamic()
         screen = Gtk.GAccessor.style_context(vbox2Button5)
         push!(screen, StyleProvider(provider), 600)
 
-        vbox2[1, 1] = vbox2Button1
-        vbox2[2, 1] = vbox2Button2
-        vbox2[3, 1] = vbox2Button3
-        vbox2[4, 1] = vbox2Button4
-        vbox2[5, 1] = vbox2Button5
+        equitFrameFig = Frame()
+        set_gtk_property!(equitFrameFig, :height_request, 500)
+
+        # TreeView for Equitments
+        listStreamsEquit = ListStore(String, String, String)
+        push!(listStreamsEquit, ("R1", "Reactor1", "Reactor"))
+        push!(listStreamsEquit, ("R2", "Reactor2", "Reactor"))
+        push!(listStreamsEquit, ("R3", "Reactor3", "Reactor"))
+
+        viewStreamsEquit = TreeView(TreeModel(listStreamsEquit))
+        set_gtk_property!(viewStreamsEquit, :enable_grid_lines, 3)
+        set_gtk_property!(viewStreamsEquit, :enable_search, true)
+
+        # Window that allow scroll the TreeView
+        scrollStreamsEquit = ScrolledWindow(viewStreamsEquit)
+        set_gtk_property!(scrollStreamsEquit, :width_request, 350)
+        set_gtk_property!(scrollStreamsEquit, :height_request, 250)
+        selection5 = Gtk.GAccessor.selection(viewStreamsEquit)
+
+        # Column definitions
+        cTxtREs3 = CellRendererText()
+
+        cResEquit1 = TreeViewColumn("ID", cTxtREs3, Dict([("text", 0)]))
+        cResEquit2 = TreeViewColumn("Name", cTxtREs3, Dict([("text", 1)]))
+        cResEquit3 = TreeViewColumn("Type", cTxtREs3, Dict([("text", 2)]))
+
+        # Add column to TreeView
+        push!(viewStreamsEquit, cResEquit1, cResEquit2, cResEquit3)
+
+        # Frame for viewEquit
+        equitFrameTree = Frame()
+        set_gtk_property!(equitFrameTree, :height_request, 500)
+
+        push!(equitFrameTree, scrollStreamsEquit)
+
+        vbox2[1:2, 1] = equitFrameFig
+        vbox2[3:5, 1] = equitFrameTree
+        vbox2[1, 2] = vbox2Button1
+        vbox2[2, 2] = vbox2Button2
+        vbox2[3, 2] = vbox2Button3
+        vbox2[4, 2] = vbox2Button4
+        vbox2[5, 2] = vbox2Button5
 
         ############################################################################
         # Tab 3 - Flowsheet
