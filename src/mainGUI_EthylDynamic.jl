@@ -1,24 +1,5 @@
-
-using Gtk, Gtk.ShortNames, JLD, Suppressor, CSV, Mustache, Dates
-import DataFrames
-
-# Path to CSS Gtk-Style dataFile
-global style_file = joinpath(dirname(Base.source_path()), "style2020.css")
-global img = Gtk.Image(joinpath(dirname(Base.source_path()), "media\\mainlogo.png"))
-
-# General Settings
-global settings = JLD.load(
-    joinpath(dirname(Base.source_path()), "settings.jld"),
-    "dataFile")
-
-# Load default database
-global  database = CSV.read(settings.pathDatabase[1])
-
-# Environmental variable to allow Windows decorations
-ENV["GTK_CSD"] = 0
-
 # Initialization of main function
-function EthylDynamic()
+function EthylDynamicGUI()
     # Suppress warnings
     #@suppress begin
 
