@@ -23,12 +23,6 @@ module EthylDynamic
   # Load default database
   global database = CSV.read(pathDataBase)
 
-  # Environmental variable to allow Windows decorations
-  ENV["GTK_CSD"] = 0
-
-  # CSS style
-  global provider = CssProviderLeaf(filename = style_file)
-
   # Include the main file .fl
   include("mainGUI_EthylDynamic.jl")
 end
