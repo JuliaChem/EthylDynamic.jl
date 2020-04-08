@@ -1,18 +1,3 @@
-using Gtk, Gtk.ShortNames, JLD, Suppressor, CSV, Mustache, Dates
-import DataFrames
-
-# Path to CSS Gtk-Style dataFile
-global style_file = joinpath(dirname(Base.source_path()), "style2020.css")
-
-# Logo
-global image_path = joinpath(dirname(Base.source_path()), "media\\mainlogo.png")
-
-# General Settings
-global pathDataBase = joinpath(dirname(Base.source_path()), "database.csv")
-
-# Load default database
-global database = CSV.read(pathDataBase)
-
 # Initialization of main function
 function EthylDynamicGUI()
     # Suppress warnings
