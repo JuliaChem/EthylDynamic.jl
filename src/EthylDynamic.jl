@@ -9,14 +9,26 @@ module EthylDynamic
   global style_file = joinpath(dirname(Base.source_path()), "style2020.css")
 
   # Logo
-  global image_path = joinpath(dirname(Base.source_path()), "media\\mainlogo.png")
+  if Sys.iswindows()
+    global image_path = joinpath(dirname(Base.source_path()), "media\\mainlogo.png")
+  end
+
+  if Sys.islinux()
+    global image_path = joinpath(dirname(Base.source_path()), "media//mainlogo.png")
+  end
 
   # General Settings
   global pathDataBase = joinpath(dirname(Base.source_path()), "database.csv")
 
   # Load default database
   global database = CSV.read(pathDataBase)
-  
+
+  # Environmental variable to allow Windows decorations
+  ENV["GTK_CSD"] = 0
+
+  # CSS style
+  global provider = CssProviderLeaf(filename = style_file)
+
   # Include the main file .fl
   include("mainGUI_EthylDynamic.jl")
 end

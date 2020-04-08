@@ -1,14 +1,9 @@
+
 # Initialization of main function
 function EthylDynamicGUI()
     # Suppress warnings
     #@suppress begin
-
-    # Environmental variable to allow Windows decorations
-    ENV["GTK_CSD"] = 0
-
-    # CSS style
-    global provider = CssProviderLeaf(filename = style_file)
-
+    
     ################################################################################
     # Min Win
     ################################################################################
