@@ -5,7 +5,7 @@ import DataFrames
 global style_file = joinpath(dirname(Base.source_path()), "style2020.css")
 
 # Logo
-global img = Gtk.Image(joinpath(dirname(Base.source_path()), "media\\mainlogo.png"))
+global image_path = joinpath(dirname(Base.source_path()), "media\\mainlogo.png")
 
 # General Settings
 global pathDataBase = joinpath(dirname(Base.source_path()), "database.csv")
@@ -1317,6 +1317,8 @@ function EthylDynamicGUI()
     set_gtk_property!(f1, :margin_top, 0)
     set_gtk_property!(f1, :margin_left, 0)
     set_gtk_property!(f1, :margin_right, 0)
+
+    img = Gtk.Image(image_path)
 
     mainGrid[1:2, 1] = img
     mainGrid[1, 2] = new
