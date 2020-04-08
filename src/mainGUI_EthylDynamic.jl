@@ -3,8 +3,9 @@ import DataFrames
 
 # Path to CSS Gtk-Style dataFile
 global style_file = joinpath(dirname(Base.source_path()), "style2020.css")
-println(style_file)
-global img = Gtk.Image(joinpath(dirname(Base.source_path()), "\\media\\mainlogo.png"))
+
+# Logo
+global img = Gtk.Image(joinpath(dirname(Base.source_path()), "media\\mainlogo.png"))
 
 # General Settings
 global pathDataBase = joinpath(dirname(Base.source_path()), "database.csv")
